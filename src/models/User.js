@@ -4,7 +4,7 @@ const { Schema, model } = mongoose;
 const userSchema = new Schema({
   fullName: { type: String, required: true },
   email: { type: String, required: true, lowercase: true, index: true },
-  password: { type: String, required: true },
+  password: { type: String, required: true, select: false },
   role: { type: String, enum: ['superadmin', 'schooladmin', 'teacher', 'student'], default: 'student' },
   school: { type: Schema.Types.ObjectId, ref: 'School' },
   profilePhoto: { type: String },

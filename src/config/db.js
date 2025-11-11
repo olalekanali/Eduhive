@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const connectDB = async () => {
   try {
-    const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/eduhive';
+    const uri = process.env.MONGO_URI;
     await mongoose.connect(uri, {
       // options are set by default in Mongoose 7+
     });

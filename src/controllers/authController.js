@@ -16,6 +16,10 @@ export const registerSchool = async (req, res, next) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // Check if school alreeady exists
+    const existing = await User.findOne({ email: ownerEmail });
+    if (existing) return res.status(400).json({ error: 'Email already in use' });
+
     // create admin user
     const salt = await bcrypt.genSalt(10);
     const hashed = await bcrypt.hash(ownerPassword, salt);
@@ -28,7 +32,7 @@ export const registerSchool = async (req, res, next) => {
 
     const school = await School.create({
       name: schoolName,
-      owner: user._id
+      owner: user.fullName
     });
 
     user.school = school._id;
@@ -43,16 +47,44 @@ export const registerSchool = async (req, res, next) => {
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email }).select('+password').exec() || await User.findOne({ email });
+
+    const user = await User.findOne({ email })
+      .select('+password')
+      .populate('school'); // ✅ populate school info
+
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ error: 'Invalid credentials' });
 
-    const payload = { id: user._id, role: user.role, school: user.school };
-    const token = jwt.sign(payload, process.env.JWT_SECRET || 'secret', { expiresIn: process.env.JWT_EXPIRES_IN || '1d' });
+    const payload = { 
+      id: user._id, 
+      role: user.role, 
+      school: user.school?._id 
+    };
 
-    res.json({ token, user: { id: user._id, email: user.email, role: user.role, fullName: user.fullName } });
+    const token = jwt.sign(
+      payload,
+      process.env.JWT_SECRET || 'secret',
+      { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
+    );
+
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        fullName: user.fullName,
+        school: user.school ? {
+          id: user.school._id,
+          name: user.school.name,
+          owner: user.school.owner,
+          createdAt: user.school.createdAt
+        } : null
+      }
+    });
+
   } catch (err) {
     next(err);
   }

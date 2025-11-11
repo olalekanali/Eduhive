@@ -2,12 +2,12 @@ import express from 'express';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import cors from 'cors';
-import morgan from 'morgan';
 import connectDB from './config/db.js';
 import authRoutes from './routes/auth.js';
 import schoolRoutes from './routes/schools.js';
 import studentRoutes from './routes/students.js';
 import teacherRoutes from './routes/teachers.js';
+import registerSuperAdmin from './routes/superAdmin.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -19,13 +19,13 @@ connectDB();
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
-app.use(morgan('dev'));
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/schools', schoolRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/teachers', teacherRoutes);
+app.use('/api/superadmin', registerSuperAdmin);
 
 app.get('/', (req, res) => res.json({ ok: true, name: 'EduHive Backend' }));
 
