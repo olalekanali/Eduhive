@@ -9,6 +9,7 @@ import studentRoutes from './routes/students.js';
 import teacherRoutes from './routes/teachers.js';
 import registerSuperAdmin from './routes/superAdmin.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { swaggerUiServe, swaggerUiSetup } from "./swagger/swagger.js";
 
 dotenv.config();
 const app = express();
@@ -26,6 +27,8 @@ app.use('/api/schools', schoolRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/superadmin', registerSuperAdmin);
+
+app.use("/api-docs", swaggerUiServe, swaggerUiSetup);
 
 app.get('/', (req, res) => res.json({ ok: true, name: 'EduHive Backend' }));
 
